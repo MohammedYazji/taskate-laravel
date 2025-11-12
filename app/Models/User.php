@@ -46,4 +46,22 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    protected static function booted()
+        {
+            static::created(function ($user) {
+                // Check if user already has an Inbox (just in case)
+                if (!$user->projects()->where('name', 'Inbox')->exists()) {
+                    $user->projects()->create([
+                        'name' => 'Inbox',
+                        'description' => 'Default task inbox',
+                    ]);
+                }
+            });
+        }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }
