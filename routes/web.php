@@ -16,6 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // store project
     Route::post('/project', [ProjectController::class, 'store'])->name('project.store');
 
+    // display the auth user projects
+    Route::get('/projects', [ProjectController::class, 'index'])->name('project.projects');
+
 
 });
 

@@ -11,13 +11,26 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $projects = auth()->user()->projects()->latest()->get();
+        $user = auth()->user();
 
-        // dump($projects);
+        $search = $request->input("search");
 
-        // return view("projects.index", ["projects"=> $projects]);
+        $query = $user->projects()
+        ->where('name', '!=', 'Inbox');
+
+        if (!empty($search)) {
+            $query = $query->where('name','like','%' . $search . '%');
+        }
+
+        $projects = $query
+        ->latest()
+        ->get();
+
+        return view("project.projects", [
+            "projects"=> $projects,
+            "search" => $search]);
     }
 
     public function inbox()
@@ -49,7 +62,7 @@ class ProjectController extends Controller
 
         Project::create($data);
 
-        return redirect()->route("dashboard");
+        return redirect()->route("project.projects");
     }
 
     /**

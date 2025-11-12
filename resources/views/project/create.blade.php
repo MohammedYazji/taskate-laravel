@@ -2,7 +2,7 @@
     <div class="py-12 bg-gray-50 min-h-screen">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <h1 class="text-4xl font-extrabold text-gray-800 mb-8">
-                📝 Create New Post
+                Create New Project
             </h1>
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl p-10">
                 <form action="{{ route('project.store') }}" method="post" enctype="multipart/form-data">
@@ -11,7 +11,7 @@
 
                     {{-- Name --}}
                     <div class="mb-6">
-                        <x-input-label for="name" :value="__('Post Title')" />
+                        <x-input-label for="name" :value="__('Project Name')" />
                         <input
                             class="block mt-1 w-full border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 rounded-lg shadow-sm"
                             name="name"
