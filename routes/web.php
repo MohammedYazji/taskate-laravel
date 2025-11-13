@@ -31,6 +31,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // display the auth user projects
     Route::get('/projects', [ProjectController::class, 'index'])->name('project.projects');
 
+    // show project page
+    Route::get('/project/{project}', [ProjectController::class, 'show'])->name('project.show');
+
 
 });
 

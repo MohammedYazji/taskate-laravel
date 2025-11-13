@@ -14,8 +14,20 @@ class Task extends Model
         "due_date",
     ] ;
 
+    protected $dates = ["due_date"];
+
+    protected $casts = [
+        "due_date"=> "datetime",
+        "is_completed" => "boolean",
+    ];
+
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function getFormattedDueDate()
+    {
+        return $this->due_date->format('M d, Y');
     }
 }

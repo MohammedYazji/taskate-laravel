@@ -42,7 +42,9 @@ class ProjectController extends Controller
         // Get Inbox Project fot the logged-in user
         $project = $user->projects()->where("name", "Inbox")->first();
 
-        return view("project.project", ["project" => $project]);
+        $tasks = $project?->tasks ?? [];
+
+        return view("project.project", ["project" => $project, "tasks"=> $tasks]);
     }
 
     public function today()
@@ -51,7 +53,9 @@ class ProjectController extends Controller
 
         $project = $user->projects()->where("name", "Today")->first();
 
-        return view("project.project", ["project" => $project]);
+        $tasks = $project?->tasks ?? [];
+
+        return view("project.project", ["project" => $project, "tasks"=> $tasks]);
     }
 
     /**
@@ -81,7 +85,13 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        //
+        $user = auth()->user();
+
+        $project = $user->projects()->findOrFail( $project->id );
+
+        $tasks = $project->tasks ?? [];
+
+        return view("project.project", ["project" => $project, "tasks"=> $tasks]);
     }
 
     /**

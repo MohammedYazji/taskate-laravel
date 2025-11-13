@@ -25,12 +25,11 @@
                         <p class="text-lg font-medium">{{ $projects->count() }} Projects</p>
                         <hr class="mb-10 mt-1">
                         @foreach ($projects as $project)
-                            {{-- TODO: implement project.show --}}
-                            <a class="ml-10 mb-5 flex gap-4 items-center">
+                            <a href="{{ route('project.show', $project) }}" class="ml-10 mb-5 flex gap-4 items-center">
                                 <x-hashtag-icon />
                                 <h2>{{ $project->name }}<h2>
+                        @endforeach
                     </div>
-                    @endforeach
                 </div>
             </div>
         </div>
