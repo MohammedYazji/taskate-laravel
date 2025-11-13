@@ -16,6 +16,10 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Inbox') }}
                     </x-nav-link>
+                    {{-- Today --}}
+                    <x-nav-link :href="route('project.today')" :active="request()->routeIs('project.today')">
+                        {{ __('Today') }}
+                    </x-nav-link>
                     {{-- User Projects --}}
                     <x-nav-link :href="route('project.projects')" :active="request()->routeIs('project.projects')">
                         {{ __('My Projects') }}

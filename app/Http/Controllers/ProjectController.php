@@ -18,7 +18,9 @@ class ProjectController extends Controller
         $search = $request->input("search");
 
         $query = $user->projects()
-        ->where('name', '!=', 'Inbox');
+        ->where('name', '!=', 'Inbox')
+        ->where('name', '!=', 'Today');
+
 
         if (!empty($search)) {
             $query = $query->where('name','like','%' . $search . '%');
@@ -38,9 +40,18 @@ class ProjectController extends Controller
         $user = auth()->user();
 
         // Get Inbox Project fot the logged-in user
-        $inbox = $user->projects()->where("name", "Inbox")->first();
+        $project = $user->projects()->where("name", "Inbox")->first();
 
-        return view("project.inbox", ["inbox" => $inbox]);
+        return view("project.project", ["project" => $project]);
+    }
+
+    public function today()
+    {
+        $user = auth()->user();
+
+        $project = $user->projects()->where("name", "Today")->first();
+
+        return view("project.project", ["project" => $project]);
     }
 
     /**

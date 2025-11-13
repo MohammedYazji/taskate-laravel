@@ -10,6 +10,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // inbox home page
     Route::get('/', [ProjectController::class, 'inbox'])->name('dashboard');
 
+    // today page
+    Route::get('/today', [ProjectController::class, 'today'])->name('project.today');
+
     // create project
     Route::get('/project/create', [ProjectController::class, 'create'])->name('project.create');
 

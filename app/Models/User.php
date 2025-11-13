@@ -58,7 +58,18 @@ class User extends Authenticatable implements MustVerifyEmail
                     ]);
                 }
             });
+
+            static::created(function ($user)
+                    {
+                if (!$user->projects()->where('name', 'Today')->exists()) {
+                    $user->projects()->create([
+                        'name'=> 'Today',
+                        'description'=> 'Tasks of Today',
+                        ]);
+                    }
+                });
         }
+
 
     public function projects()
     {
