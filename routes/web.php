@@ -26,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // store task
     Route::post('/task', [TaskController::class, 'store'])->name('task.store');
+
+    // update task
+    Route::patch('/task/{task}', [TaskController::class, 'update'])->name('task.update');
     ///////////////////////////////
 
     // display the auth user projects

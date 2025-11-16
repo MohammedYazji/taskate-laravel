@@ -7,7 +7,7 @@
                     <ul class="space-y-4">
                         @forelse ($tasks as $task)
                             <li class="border border-gray-100 rounded-lg">
-                                <form method="POST"
+                                <form method="POST" action="{{ route('task.update', $task) }}"
                                     class="flex items-start gap-4 p-4">
                                     @csrf
                                     @method('PATCH')

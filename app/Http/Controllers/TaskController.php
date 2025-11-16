@@ -71,9 +71,21 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Task $task)
     {
-        //
+        // Ensure the task belongs to a project owned by the authenticated user
+        $user = auth()->user();
+        $project = $task->project;
+
+        if (!$project || $project->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $task->update([
+            'is_completed' => $request->boolean('is_completed'),
+        ]);
+
+        return back();
     }
 
     /**
