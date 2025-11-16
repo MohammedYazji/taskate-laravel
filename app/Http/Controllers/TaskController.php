@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskStoreRequest;
+use App\Http\Requests\TaskUpdateRequest;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -63,15 +64,40 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Task $task)
     {
-        //
+        $user = auth()->user();
+        $project = $task->project;
+
+        if (!$project || $project->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $projects = $user->projects;
+
+        return view("task.edit", ["task" => $task, "projects" => $projects]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(TaskUpdateRequest $request, Task $task)
+    {
+        $data = $request->validated();
+
+        // Handle due_date: parse if provided, set to null if empty
+        if (isset($data['due_date']) && ! empty($data['due_date'])) {
+            $data['due_date'] = Carbon::parse($data['due_date'])->toDateString();
+        } else {
+            $data['due_date'] = null;
+        }
+
+        $task->update($data);
+
+        return redirect()->route("dashboard");
+    }
+
+    public function completed(Request $request, Task $task)
     {
         // Ensure the task belongs to a project owned by the authenticated user
         $user = auth()->user();
@@ -87,7 +113,6 @@ class TaskController extends Controller
 
         return back();
     }
-
     /**
      * Remove the specified resource from storage.
      */

@@ -7,7 +7,7 @@
                     <ul class="space-y-4">
                         @forelse ($tasks as $task)
                             <li class="border border-gray-100 rounded-lg">
-                                <form method="POST" action="{{ route('task.update', $task) }}"
+                                <form method="POST" action="{{ route('task.completed', $task) }}"
                                     class="flex items-start gap-4 p-4">
                                     @csrf
                                     @method('PATCH')
@@ -18,7 +18,7 @@
                                         @checked($task->is_completed) onchange="this.form.submit()"
                                         aria-label="Toggle completion for {{ $task->name }}"
                                         class="mt-1 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
-                                    <div class="flex flex-col gap-1">
+                                    <div class="flex flex-col gap-1 flex-1">
                                         <span @class([
                                             'text-lg font-semibold text-gray-800',
                                             'line-through text-gray-400' => $task->is_completed,
@@ -32,11 +32,17 @@
                                         @endif
                                     </div>
 
-                                    @if ($task->due_date)
-                                        <div class="ml-auto text-sm font-medium text-gray-500">
-                                            Due {{ $task->getFormattedDueDate() }}
-                                        </div>
-                                    @endif
+                                    <div class="flex items-center gap-4">
+                                        @if ($task->due_date)
+                                            <div class="text-sm font-medium text-gray-500">
+                                                Due {{ $task->getFormattedDueDate() }}
+                                            </div>
+                                        @endif
+                                        <a href="{{ route('task.edit', $task) }}"
+                                           class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                            Edit
+                                        </a>
+                                    </div>
                                 </form>
                             </li>
                         @empty

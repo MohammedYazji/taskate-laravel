@@ -27,8 +27,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // store task
     Route::post('/task', [TaskController::class, 'store'])->name('task.store');
 
+
+
+    // show edit task form
+    Route::get('/task/{task}/edit', [TaskController::class, 'edit'])->name('task.edit');
+
     // update task
     Route::patch('/task/{task}', [TaskController::class, 'update'])->name('task.update');
+
+    // toggle task completion
+    Route::patch('/task/{task}/completed', [TaskController::class, 'completed'])->name('task.completed');
+
     ///////////////////////////////
 
     // display the auth user projects
