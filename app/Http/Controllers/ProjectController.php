@@ -51,9 +51,29 @@ class ProjectController extends Controller
     {
         $user = auth()->user();
 
+        // Get the Today project
         $project = $user->projects()->where("name", "Today")->first();
 
+
+        // Tasks that belong to Today project
         $tasks = $project?->tasks ?? [];
+
+        // All tasks from all user projects
+        $allUserTasks = $user->projects()
+        ->with("tasks")
+        ->get()
+        ->pluck("tasks")
+        ->flatten();
+
+        // Tasks with due_date today
+        $dueToday = $allUserTasks->filter(function ($task) {
+            return $task->due_date->isToday();
+        });
+
+
+        // Merge both collections and remove duplicates
+        $tasks = $tasks->merge($dueToday)->unique('id');
+
 
         return view("project.project", ["project" => $project, "tasks"=> $tasks]);
     }
