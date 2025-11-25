@@ -23,9 +23,9 @@ class TaskController extends Controller
      */
     public function create()
     {
-        $projects = auth()->user()->projects->where("name", "!=", 'Today');
+        $projects = auth()->user()->projects->where('name', '!=', 'Today');
 
-        return view("task.create", ["projects"=> $projects]);
+        return view('task.create', ['projects' => $projects]);
     }
 
     /**
@@ -35,13 +35,13 @@ class TaskController extends Controller
     {
         $data = $request->validated();
 
-        if(empty($data["project_id"])) {
+        if (empty($data['project_id'])) {
             $inbox = auth()
-            ->user()
-            ->projects
-            ->where("name", "Inbox")->first();
+                ->user()
+                ->projects
+                ->where('name', 'Inbox')->first();
 
-            $data["project_id"] = $inbox?->id;
+            $data['project_id'] = $inbox?->id;
         }
 
         if (! empty($data['due_date'])) {
@@ -50,7 +50,7 @@ class TaskController extends Controller
 
         Task::create($data);
 
-        return redirect()->route("dashboard");
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -69,13 +69,13 @@ class TaskController extends Controller
         $user = auth()->user();
         $project = $task->project;
 
-        if (!$project || $project->user_id !== $user->id) {
+        if (! $project || $project->user_id !== $user->id) {
             abort(403, 'Unauthorized action.');
         }
 
         $projects = $user->projects;
 
-        return view("task.edit", ["task" => $task, "projects" => $projects]);
+        return view('task.edit', ['task' => $task, 'projects' => $projects]);
     }
 
     /**
@@ -94,25 +94,41 @@ class TaskController extends Controller
 
         $task->update($data);
 
-        return redirect()->route("dashboard");
+        return redirect()->route('dashboard');
     }
 
     public function completed(Request $request, Task $task)
     {
-        // Ensure the task belongs to a project owned by the authenticated user
         $user = auth()->user();
         $project = $task->project;
 
-        if (!$project || $project->user_id !== $user->id) {
+        // Ownership check
+        if (! $project || $project->user_id !== $user->id) {
             abort(403, 'Unauthorized action.');
         }
 
-        $task->update([
-            'is_completed' => $request->boolean('is_completed'),
-        ]);
+        // Toggle the completion status
+        $task->is_completed = ! $task->is_completed;
+        $task->save();
 
         return back();
     }
+
+//     public function completed(Request $request, Task $task)
+// {
+//     // Validate the incoming data
+//     $data = $request->validate([
+//         'is_completed' => 'required|boolean',
+//     ]);
+
+//     // Update the task
+//     $task->update([
+//         'is_completed' => $data['is_completed'],
+//     ]);
+
+//     return back()->with('success', 'Task updated successfully.');
+// }
+
     /**
      * Remove the specified resource from storage.
      */

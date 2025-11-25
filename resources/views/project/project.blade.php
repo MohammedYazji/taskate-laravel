@@ -4,6 +4,32 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h1 class="text-2xl font-extrabold mb-10"> {{ $project->name }}</h1>
+                    @php
+                        $currentRoute = request()->route()->getName();
+                        $routeName = match ($currentRoute) {
+                            'project.today' => 'project.today',
+                            'project.show' => 'project.show',
+                            default => 'dashboard',
+                        };
+                        $baseParams = $routeName === 'project.show' && isset($project) ? ['project' => $project->id] : [];
+                    @endphp
+                    <div class="flex gap-3 items-center mx-auto justify-center pb-6 flex-wrap">
+                        <x-primary-button
+                            href="{{ route($routeName, $baseParams) }}"
+                            class="{{ $filter ? 'opacity-60' : '' }}">
+                            All
+                        </x-primary-button>
+                        <x-primary-button
+                            href="{{ route($routeName, array_merge($baseParams, ['filter' => 'active'])) }}"
+                            class="{{ $filter === 'active' ? '' : 'opacity-60' }}">
+                            Active
+                        </x-primary-button>
+                        <x-primary-button
+                            href="{{ route($routeName, array_merge($baseParams, ['filter' => 'completed'])) }}"
+                            class="{{ $filter === 'completed' ? '' : 'opacity-60' }}">
+                            Completed
+                        </x-primary-button>
+                    </div>
                     <ul class="space-y-4">
                         @forelse ($tasks as $task)
                             <li class="border border-gray-100 rounded-lg">
@@ -12,9 +38,7 @@
                                     @csrf
                                     @method('PATCH')
 
-                                    <input type="hidden" name="is_completed" value="0">
-
-                                    <input type="checkbox" name="is_completed" value="1"
+                                    <input type="checkbox"
                                         @checked($task->is_completed) onchange="this.form.submit()"
                                         aria-label="Toggle completion for {{ $task->name }}"
                                         class="mt-1 h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
@@ -39,7 +63,7 @@
                                             </div>
                                         @endif
                                         <a href="{{ route('task.edit', $task) }}"
-                                           class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                            class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
                                             Edit
                                         </a>
                                     </div>

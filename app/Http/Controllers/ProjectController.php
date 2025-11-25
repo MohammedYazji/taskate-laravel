@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProjectStoreRequest;
@@ -15,75 +14,99 @@ class ProjectController extends Controller
     {
         $user = auth()->user();
 
-        $search = $request->input("search");
+        $search = $request->input('search');
 
         $query = $user->projects()
-        ->where('name', '!=', 'Inbox')
-        ->where('name', '!=', 'Today');
+            ->where('name', '!=', 'Inbox')
+            ->where('name', '!=', 'Today');
 
-
-        if (!empty($search)) {
-            $query = $query->where('name','like','%' . $search . '%');
+        if (! empty($search)) {
+            $query = $query->where('name', 'like', '%'.$search.'%');
         }
 
         $projects = $query
-        ->latest()
-        ->get();
+            ->latest()
+            ->get();
 
-        return view("project.projects", [
-            "projects"=> $projects,
-            "search" => $search]);
+        return view('project.projects', [
+            'projects' => $projects,
+            'search' => $search]);
     }
 
     public function inbox()
     {
         $user = auth()->user();
+        $filter = $this->normalizeFilter(request()->query('filter'));
 
-        // Get Inbox Project fot the logged-in user
-        $project = $user->projects()->where("name", "Inbox")->first();
+        $project = $user->projects()->where('name', 'Inbox')->first();
 
-        $tasks = $project?->tasks ?? [];
+        $tasks = collect();
 
-        return view("project.project", ["project" => $project, "tasks"=> $tasks]);
+        if ($project) {
+            $tasks = $project->tasks()
+                ->orderByDesc('created_at')
+                ->when($filter === 'active', fn ($q) => $q->where('is_completed', false))
+                ->when($filter === 'completed', fn ($q) => $q->where('is_completed', true))
+                ->get();
+        }
+
+        return view('project.project', [
+            'project' => $project,
+            'tasks' => $tasks,
+            'filter' => $filter,
+        ]);
     }
+
 
     public function today()
     {
         $user = auth()->user();
 
-        // Get the Today project
-        $project = $user->projects()->where("name", "Today")->first();
+        // Get Today project
+        $project = $user->projects()->where('name', 'Today')->first();
 
+        // Selected filter: null | active | completed
+        $filter = $this->normalizeFilter(request()->query('filter'));
 
-        // Tasks that belong to Today project
-        $tasks = $project?->tasks ?? [];
+        // Get Today-project tasks
+        $tasks = $project?->tasks ?? collect();
 
-        // All tasks from all user projects
+        // All tasks of all user projects
         $allUserTasks = $user->projects()
-        ->with("tasks")
-        ->get()
-        ->pluck("tasks")
-        ->flatten();
+            ->with('tasks')
+            ->get()
+            ->pluck('tasks')
+            ->flatten();
 
-        // Tasks with due_date today
+        // Tasks due today
         $dueToday = $allUserTasks->filter(function ($task) {
-            return $task->due_date->isToday();
+            return $task->due_date?->isToday();
         });
 
-
-        // Merge both collections and remove duplicates
+        // Merge Today tasks + due_today tasks and remove duplicates
         $tasks = $tasks->merge($dueToday)->unique('id');
 
+        // Apply filter
+        if ($filter === 'active') {
+            $tasks = $tasks->filter(fn ($t) => ! $t->is_completed);
+        } elseif ($filter === 'completed') {
+            $tasks = $tasks->filter(fn ($t) => $t->is_completed);
+        }
 
-        return view("project.project", ["project" => $project, "tasks"=> $tasks]);
+        return view('project.project', [
+            'project' => $project,
+            'tasks' => $tasks,
+            'filter' => $filter, // ← IMPORTANT
+        ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view("project.create");
+        return view('project.create');
     }
 
     /**
@@ -93,11 +116,11 @@ class ProjectController extends Controller
     {
         $data = $request->validated();
 
-        $data["user_id"] = auth()->id();
+        $data['user_id'] = auth()->id();
 
         Project::create($data);
 
-        return redirect()->route("project.projects");
+        return redirect()->route('project.projects');
     }
 
     /**
@@ -107,11 +130,26 @@ class ProjectController extends Controller
     {
         $user = auth()->user();
 
-        $project = $user->projects()->findOrFail( $project->id );
+        $filter = $this->normalizeFilter(request()->query('filter'));
 
-        $tasks = $project->tasks ?? [];
+        $project = $user->projects()->findOrFail($project->id);
 
-        return view("project.project", ["project" => $project, "tasks"=> $tasks]);
+        $tasks = $project->tasks()
+            ->orderByDesc('created_at')
+            ->when($filter === 'active', fn ($q) => $q->where('is_completed', false))
+            ->when($filter === 'completed', fn ($q) => $q->where('is_completed', true))
+            ->get();
+
+        return view('project.project', [
+            'project' => $project,
+            'tasks' => $tasks,
+            'filter' => $filter,
+        ]);
+    }
+
+    protected function normalizeFilter(?string $filter): ?string
+    {
+        return in_array($filter, ['active', 'completed'], true) ? $filter : null;
     }
 
     /**
